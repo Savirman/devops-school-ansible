@@ -1,0 +1,29 @@
+---
+- name: Deleting of the Apache web-server,
+  hosts: nodes
+
+  tasks:
+
+  - name: Remove the Apache Web-server
+    yum:
+      name: httpd
+      state: absent
+
+  - name: Delete the file index.html
+    file:
+      path: "/var/www/html/index.html"
+      state: absent
+
+  - name: Permit 80 TCP port in firewalld
+    firewalld:
+      zone: public
+      service: http
+      permanent: yes
+      state: disabled
+
+  - name: Permit 443 TCP port in firewalld
+    firewalld:
+      zone: public
+      service: https
+      permanent: yes
+      state: disabled

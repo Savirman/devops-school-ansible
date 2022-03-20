@@ -1,0 +1,57 @@
+---
+- name: Installation of the Apache web-server
+  hosts: nodes
+  gather_facts: yes
+
+  tasks:
+
+  - name: Install the Apache Web-server
+    yum:
+      name: httpd
+      state: latest
+
+  - name: Start the Apache Web-server
+    service:
+      name: httpd
+      state: started
+
+  - name: Enable the Apache Web-server on boot
+    service:
+      name: httpd
+      enabled: yes
+
+  - name: Check if the Apache is started
+    service_facts:
+
+  - name: See the Apache service facts as they are
+    debug: 
+      msg: "{{ansible_facts.services['httpd.service'].state}}"
+
+  - name: Verify is the Apache Web-server is running
+    assert:
+      that:
+        - "'{{ansible_facts.services['httpd.service'].state}}' == 'running'"
+      fail_msg: "Apache is down"
+      success_msg: "Apache is up"
+
+  - name: Create a file index.html
+    copy:
+      content: "Welcome to my web-server!"
+      dest: "/var/www/html/index.html"
+      owner: ansible
+      group: ansible
+      mode: 0644
+
+  - name: Allow 80 TCP port in firewalld
+    firewalld:
+      zone: public
+      service: http
+      permanent: yes
+      state: enabled
+
+  - name: Allow 443 TCP port in firewalld
+    firewalld:
+      zone: public
+      service: https
+      permanent: yes
+      state: enabled

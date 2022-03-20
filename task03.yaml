@@ -1,0 +1,22 @@
+---
+- name: Change grub file
+  hosts: nodes
+
+  tasks:
+
+  - name: "Add net.ifnames=0 biosdevname=0 to grub"
+    lineinfile:
+      dest: /etc/default/grub
+      insertafter: 'GRUB_TERMINAL_OUTPUT="console"'
+      line: 'GRUB_CMDLINE_LINUX="rd.lvm.lv=cl_node3/root rhgb quiet net.ifnames=0 devbiosname=0"'
+      state: present
+
+  - name: "Delete an old string"
+    lineinfile:
+      dest: /etc/default/grub
+      line: GRUB_CMDLINE_LINUX="rd.lvm.lv=cl_node3/root rhgb quiet"
+      state: absent
+
+  - name: Apply changes to grub
+    shell:
+      cmd: /usr/sbin/grub2-mkconfig
